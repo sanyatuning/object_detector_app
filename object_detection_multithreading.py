@@ -82,6 +82,9 @@ def worker(input_q, output_q):
 
 
 if __name__ == '__main__':
+
+    print(category_index)
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-src', '--source', dest='video_source', type=int,
                         default=0, help='Device index of the camera.')

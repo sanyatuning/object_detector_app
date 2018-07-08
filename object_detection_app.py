@@ -1,15 +1,19 @@
+import http
 import os
 import cv2
 import time
 import argparse
-import multiprocessing
 import numpy as np
 import tensorflow as tf
 
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn
+
+from utils import cli_utils
 from utils.app_utils import FPS, WebcamVideoStream
-from multiprocessing import Queue, Pool
+from multiprocessing import Queue, Pool, Process
 from object_detection.utils import label_map_util
-from object_detection.utils import visualization_utils as vis_util
+from object_detection.utils import visualization_utils
 
 CWD_PATH = os.getcwd()
 
@@ -48,8 +52,15 @@ def detect_objects(image_np, sess, detection_graph):
         [boxes, scores, classes, num_detections],
         feed_dict={image_tensor: image_np_expanded})
 
+    cli_utils.print_labels_scores_and_pos(
+        np.squeeze(boxes),
+        np.squeeze(classes).astype(np.int32),
+        np.squeeze(scores),
+        category_index,
+    )
+
     # Visualization of the results of a detection.
-    vis_util.visualize_boxes_and_labels_on_image_array(
+    visualization_utils.visualize_boxes_and_labels_on_image_array(
         image_np,
         np.squeeze(boxes),
         np.squeeze(classes).astype(np.int32),
@@ -83,22 +94,87 @@ def worker(input_q, output_q):
     sess.close()
 
 
+class CamHandler(BaseHTTPRequestHandler):
+
+    def __init__(self, request, client_address, server):
+        img_src = 'http://{}:{}/cam.mjpg'.format(server.server_address[0], server.server_address[1])
+        self.html_page = """
+            <html>
+                <head></head>
+                <body>
+                    <img src="{}"/>
+                </body>
+            </html>""".format(img_src)
+        self.html_404_page = """
+            <html>
+                <head></head>
+                <body>
+                    <h1>NOT FOUND</h1>
+                </body>
+            </html>"""
+        BaseHTTPRequestHandler.__init__(self, request, client_address, server)
+
+    def do_GET(self):
+        if self.path.endswith('.mjpg'):
+            self.send_response(http.HTTPStatus.OK)
+            self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
+            self.end_headers()
+            while True:
+                try:
+                    img = cv2.cvtColor(output_q.get(), cv2.COLOR_RGB2BGR)
+                    retval, jpg = cv2.imencode('.jpg', img)
+                    if not retval:
+                        raise RuntimeError('Could not encode img to JPEG')
+                    jpg_bytes = jpg.tobytes()
+
+                    self.wfile.write("--jpgboundary\r\n".encode())
+                    self.send_header('Content-type', 'image/jpeg')
+                    self.send_header('Content-length', len(jpg_bytes))
+                    self.end_headers()
+                    self.wfile.write(jpg_bytes)
+                except (IOError, ConnectionError):
+                    break
+        elif self.path.endswith('.html'):
+            self.send_response(http.HTTPStatus.OK)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write(self.html_page.encode())
+        else:
+            self.send_response(http.HTTPStatus.NOT_FOUND)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write(self.html_404_page.encode())
+
+
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """Handle requests in a separate thread."""
+
+
+def start_http_server():
+    server = ThreadedHTTPServer(('localhost', 8080), CamHandler)
+    try:
+        print("server started")
+        server.serve_forever()
+    except KeyboardInterrupt:
+        server.socket.close()
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-src', '--source', dest='video_source', type=int,
                         default=0, help='Device index of the camera.')
     parser.add_argument('-wd', '--width', dest='width', type=int,
-                        default=480, help='Width of the frames in the video stream.')
+                        default=160, help='Width of the frames in the video stream.')
     parser.add_argument('-ht', '--height', dest='height', type=int,
-                        default=360, help='Height of the frames in the video stream.')
+                        default=120, help='Height of the frames in the video stream.')
     parser.add_argument('-num-w', '--num-workers', dest='num_workers', type=int,
                         default=2, help='Number of workers.')
     parser.add_argument('-q-size', '--queue-size', dest='queue_size', type=int,
                         default=5, help='Size of the queue.')
     args = parser.parse_args()
 
-    logger = multiprocessing.log_to_stderr()
-    logger.setLevel(multiprocessing.SUBDEBUG)
+    # logger = multiprocessing.log_to_stderr()
+    # logger.setLevel(multiprocessing.SUBDEBUG)
 
     input_q = Queue(maxsize=args.queue_size)
     output_q = Queue(maxsize=args.queue_size)
@@ -109,20 +185,20 @@ if __name__ == '__main__':
                                       height=args.height).start()
     fps = FPS().start()
 
-    while True:  # fps._numFrames < 120
-        frame = video_capture.read()
-        input_q.put(frame)
+    p = Process(target=start_http_server)
+    p.start()
 
-        t = time.time()
+    try:
+        while True:
+            frame = video_capture.read()
+            input_q.put(frame)
+            time.sleep(0.25)
 
-        output_rgb = cv2.cvtColor(output_q.get(), cv2.COLOR_RGB2BGR)
-        cv2.imshow('Video', output_rgb)
-        fps.update()
-
-        print('[INFO] elapsed time: {:.2f}'.format(time.time() - t))
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+            # output_rgb = cv2.cvtColor(output_q.get(), cv2.COLOR_RGB2BGR)
+            # cv2.imshow('Video', output_rgb)
+            fps.update()
+    except KeyboardInterrupt:
+        pass
 
     fps.stop()
     print('[INFO] elapsed time (total): {:.2f}'.format(fps.elapsed()))
@@ -130,4 +206,7 @@ if __name__ == '__main__':
 
     pool.terminate()
     video_capture.stop()
-    cv2.destroyAllWindows()
+    print('terminate server process')
+    p.join(1)
+    p.terminate()
+    # cv2.destroyAllWindows()

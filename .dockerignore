@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+
+.dockerignore
+docker-compose.yaml
+Dockerfile
+
+
+*.pb
