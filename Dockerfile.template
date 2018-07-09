@@ -10,8 +10,8 @@ RUN apt-get install -q -y build-essential git cmake pkg-config \
 
 RUN pip install Image matplotlib
 
-RUN wget -q -o /opencv.zip https://github.com/Itseez/opencv/archive/3.1.0.zip
-RUN wget -q -o /opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/3.1.0.zip
+RUN wget -q -O /opencv.zip https://github.com/Itseez/opencv/archive/3.1.0.zip
+RUN wget -q -O /opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/3.1.0.zip
 
 WORKDIR /
 
