@@ -13,6 +13,8 @@ RUN pip install Image matplotlib
 RUN wget -q -o /opencv.zip https://github.com/Itseez/opencv/archive/3.1.0.zip
 RUN wget -q -o /opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/3.1.0.zip
 
+WORKDIR /
+
 RUN unzip -q opencv.zip
 RUN unzip -q opencv_contrib.zip
 
