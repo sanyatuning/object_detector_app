@@ -8,7 +8,7 @@ RUN apt-get install -q build-essential git cmake pkg-config \
     libgtk2.0-dev \
     unzip
 
-RUN pip install -q Image opencv-python matplotlib numpy
+RUN pip install -q Image matplotlib numpy
 RUN pip install -q http://ci.tensorflow.org/view/Nightly/job/nightly-pi-python3/122/artifact/output-artifacts/tensorflow-1.5.0-cp34-none-any.whl
 
 RUN wget -q -o /opencv.zip https://github.com/Itseez/opencv/archive/3.1.0.zip

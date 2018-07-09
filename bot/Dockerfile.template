@@ -2,8 +2,7 @@ FROM resin/%%RESIN_MACHINE_NAME%%-python:3.5
 
 RUN pip install -q redis
 
-ADD bot /app/bot
-ADD *.py /app/
+ADD . /app
 
 WORKDIR /app
 
