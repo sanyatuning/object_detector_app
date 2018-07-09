@@ -8,8 +8,8 @@
 version: '2'
 services:
   bot:
-    build: .
-    command: python3 -u bot.py
+    build: bot
+
   object_detector_app:
     build: .
     devices:
@@ -17,6 +17,7 @@ services:
        - /dev/dri
     ports:
       - "8080:8080"
+
   redis:
     image: redis:4-alpine
     ports:
