@@ -1,7 +1,7 @@
 FROM elswork/tensorflow:arm32v7
 
 RUN apt-get update -q
-RUN apt-get install -q build-essential git cmake pkg-config \
+RUN apt-get install -q -y build-essential git cmake pkg-config \
     libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
     libxvidcore-dev libx264-dev \

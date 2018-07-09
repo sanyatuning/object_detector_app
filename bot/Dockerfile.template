@@ -1,4 +1,4 @@
-FROM resin/%%RESIN_MACHINE_NAME%%-python:3.5
+FROM resin/%%RESIN_MACHINE_NAME%%-alpine-python:3-slim
 
 RUN pip install -q redis
 
@@ -6,5 +6,4 @@ ADD . /app
 
 WORKDIR /app
 
-
-CMD python3 -u bot.py
+CMD python -u bot.py
