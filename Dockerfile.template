@@ -1,6 +1,14 @@
 FROM elswork/tensorflow:arm32v7
 
-RUN pip install Image matplotlib numpy
+RUN apt-get update -q
+RUN apt-get install -q build-essential git cmake pkg-config \
+    libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev \
+    libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
+    libxvidcore-dev libx264-dev \
+    libgtk2.0-dev \
+    unzip wget
+
+RUN pip install PIL matplotlib
 
 RUN wget -q -o /opencv.zip https://github.com/Itseez/opencv/archive/3.1.0.zip
 RUN wget -q -o /opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/3.1.0.zip
@@ -11,13 +19,6 @@ RUN unzip -q opencv_contrib.zip
 RUN mkdir /opencv-3.1.0/build
 WORKDIR /opencv-3.1.0/build
 
-RUN apt-get update -q
-RUN apt-get install -q build-essential git cmake pkg-config \
-    libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev \
-    libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
-    libxvidcore-dev libx264-dev \
-    libgtk2.0-dev \
-    unzip
 
 RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
 	-D CMAKE_INSTALL_PREFIX=/usr/local \
