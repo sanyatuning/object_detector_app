@@ -1,4 +1,4 @@
-FROM elswork/tensorflow:latest
+FROM elswork/tensorflow:arm32v7
 
 RUN pip install Image matplotlib numpy
 
