@@ -6,6 +6,7 @@ __pycache__/
 .dockerignore
 docker-compose.yaml
 Dockerfile
+Dockerfile.template
 
 
 *.pb
