@@ -5,19 +5,20 @@
 #       object_detector_app
 
 
-version: '3'
+version: '2'
 services:
+  bot:
+    build: .
+    command: python3 -u bot.py
   object_detector_app:
     build: .
     devices:
        - /dev/video0
        - /dev/dri
-       - /dev/snd
-    environment:
-       - DISPLAY
-       - QT_X11_NO_MITSHM=1
-    volumes:
-       - /etc/localtime:/etc/localtime:ro
-       - /tmp/.X11-unix:/tmp/.X11-unix
-    expose:
-      - "8080"
+    ports:
+      - "8080:8080"
+  redis:
+    image: redis:4-alpine
+    ports:
+      - "6379:6379"
+

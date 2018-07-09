@@ -1,4 +1,5 @@
 import http
+import multiprocessing
 import os
 import cv2
 import time
@@ -91,6 +92,8 @@ def worker(input_q, output_q):
         fps.update()
         frame = input_q.get()
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        if output_q.full():
+            output_q.get()
         output_q.put(detect_objects(frame_rgb, sess, detection_graph))
 
     fps.stop()
@@ -154,9 +157,9 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 
 def start_http_server():
-    server = ThreadedHTTPServer(('localhost', 8080), CamHandler)
+    server = ThreadedHTTPServer(('0.0.0.0', 8080), CamHandler)
     try:
-        print("server started")
+        print("server started 8080")
         server.serve_forever()
     except KeyboardInterrupt:
         server.socket.close()
@@ -176,7 +179,7 @@ if __name__ == '__main__':
                         default=5, help='Size of the queue.')
     args = parser.parse_args()
 
-    # logger = multiprocessing.log_to_stderr()
+    logger = multiprocessing.log_to_stderr()
     # logger.setLevel(multiprocessing.SUBDEBUG)
 
     input_q = Queue(maxsize=args.queue_size)
@@ -195,7 +198,7 @@ if __name__ == '__main__':
         while True:
             frame = video_capture.read()
             input_q.put(frame)
-            time.sleep(0.25)
+            time.sleep(0.5)
 
             # output_rgb = cv2.cvtColor(output_q.get(), cv2.COLOR_RGB2BGR)
             # cv2.imshow('Video', output_rgb)

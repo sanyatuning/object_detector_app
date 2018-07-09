@@ -30,10 +30,13 @@ RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
 	-D PYTHON_DEFAULT_EXECUTABLE=/usr/local/bin/python3 \
 	-D BUILD_EXAMPLES=ON ..
 
+RUN pip install -q redis
+
 ADD object_detection /app/object_detection
 ADD utils /app/utils
 ADD *.py /app/
 
 WORKDIR /app
 
-CMD python3 object_detection_app.py -num-w 1
+
+CMD python3 -u object_detection_app.py -num-w 1
