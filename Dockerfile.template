@@ -67,6 +67,7 @@ RUN mkdir -p /opt && cd /opt && \
     rm -rf /var/cache/apk/*
 
 RUN pip install -U --no-cache-dir redis
+RUN pip install -U --no-cache-dir opencv-python
 
 ADD object_detection /app/object_detection
 ADD utils /app/utils
