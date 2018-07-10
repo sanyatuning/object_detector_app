@@ -1,6 +1,4 @@
-FROM resin/raspberry-pi-alpine-python:3-slim
-
-RUN [ "cross-build-start" ]
+FROM resin/%%RESIN_MACHINE_NAME%%-alpine-python:3-slim
 
 #RUN apt-get update -q
 #RUN apt-get install -q -y build-essential git cmake pkg-config \
@@ -49,7 +47,7 @@ RUN apk add --no-cache gcc tesseract-ocr zlib jpeg libjpeg freetype openjpeg cur
     && ln -s /usr/include/locale.h /usr/include/xlocale.h \
     && pip install -U --no-cache-dir Pillow numpy
 
-RUN cd /opt && \
+RUN mkdir -p /opt && cd /opt && \
     curl -L $OPENCV | tar zx && \
     curl -L $OPENCV_EXTRA | tar zx && \
     cd opencv-$OPENCV_VER && \
@@ -77,7 +75,5 @@ ADD *.py /app/
 WORKDIR /app
 
 RUN python -u object_detection_app.py --help
-
-RUN [ "cross-build-end" ]
 
 CMD python -u object_detection_app.py -num-w 1
