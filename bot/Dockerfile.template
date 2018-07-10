@@ -1,9 +1,13 @@
-FROM resin/%%RESIN_MACHINE_NAME%%-alpine-python:3-slim
+FROM resin/raspberry-pi-alpine-python:3-slim
 
-RUN pip install -q redis
+RUN [ "cross-build-start" ]
+
+RUN pip install -U --no-cache-dir redis
 
 ADD . /app
 
 WORKDIR /app
+
+RUN [ "cross-build-end" ]
 
 CMD python -u bot.py

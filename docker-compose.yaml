@@ -10,7 +10,7 @@ services:
   bot:
     build: bot
 
-  object_detector_app:
+  camera:
     build:
       context: .
       args:
@@ -25,5 +25,5 @@ services:
   redis:
     build: redis
     ports:
-      - "6379:6379"
+      - "6379"
 

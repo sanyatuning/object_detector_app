@@ -1,6 +1,8 @@
-FROM elswork/tensorflow:arm32v7
+FROM resin/raspberry-pi-alpine-python:3-slim
 
-RUN apt-get update -q
+RUN [ "cross-build-start" ]
+
+#RUN apt-get update -q
 #RUN apt-get install -q -y build-essential git cmake pkg-config \
 #    libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev \
 #    libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
@@ -32,7 +34,41 @@ RUN apt-get update -q
 #RUN make
 #RUN make install
 
-RUN pip install -q redis
+#RUN pip install -q redis
+
+ENV OPENCV https://github.com/opencv/opencv/archive/3.3.0.tar.gz
+ENV OPENCV_EXTRA https://github.com/opencv/opencv_contrib/archive/3.3.0.tar.gz
+ENV OPENCV_VER 3.3.0
+
+RUN apk add -U --no-cache --virtual=build-dependencies \
+    linux-headers musl libxml2-dev libxslt-dev libffi-dev g++ \
+    musl-dev libgcc openssl-dev jpeg-dev zlib-dev freetype-dev build-base \
+    lcms2-dev openjpeg-dev python3-dev make cmake clang clang-dev ninja
+
+RUN apk add --no-cache gcc tesseract-ocr zlib jpeg libjpeg freetype openjpeg curl \
+    && ln -s /usr/include/locale.h /usr/include/xlocale.h \
+    && pip install -U --no-cache-dir Pillow numpy
+
+RUN cd /opt && \
+    curl -L $OPENCV | tar zx && \
+    curl -L $OPENCV_EXTRA | tar zx && \
+    cd opencv-$OPENCV_VER && \
+    mkdir build && cd build && \
+    cmake -G Ninja \
+          -D CMAKE_BUILD_TYPE=RELEASE \
+          -D CMAKE_INSTALL_PREFIX=/usr/local \
+          -D WITH_FFMPEG=NO \
+          -D WITH_IPP=NO \
+          -D PYTHON_EXECUTABLE=/usr/bin/python3 \
+          -D OPENCV_EXTRA_MODULES_PATH=//opt/opencv_contrib-$OPENCV_VER/modules \
+          -D WITH_OPENEXR=NO .. && \
+    ninja && ninja install && \
+    ln -s /usr/local/lib/python3.6/site-packages/cv2.cpython-36m-x86_64-linux-gnu.so \
+          /usr/lib/python3.6/site-packages/cv2.so && \
+    apk del build-dependencies && \
+    rm -rf /var/cache/apk/*
+
+RUN pip install -U --no-cache-dir redis
 
 ADD object_detection /app/object_detection
 ADD utils /app/utils
@@ -40,5 +76,8 @@ ADD *.py /app/
 
 WORKDIR /app
 
+RUN python -u object_detection_app.py --help
+
+RUN [ "cross-build-end" ]
 
 CMD python -u object_detection_app.py -num-w 1
