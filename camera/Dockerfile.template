@@ -3,24 +3,21 @@ FROM resin/%%RESIN_MACHINE_NAME%%-python:3.4-slim
 #RUN [ "cross-build-start" ]
 
 RUN apt-get update
-RUN apt-get install -y curl
+RUN apt-get install -y \
+        curl \
+        libjpeg62 libtiff5 libpng12-0 libjasper1 \
+        libgtk2.0-0 \
+        libavcodec56 libavformat56 libswscale3 libv4l-0
+
+RUN pip install --no-cache-dir numpy
 
 RUN curl -L "https://github.com/jabelone/OpenCV-for-Pi/raw/master/latest-OpenCV.deb" -o latest-OpenCV.deb
-
 RUN dpkg -i latest-OpenCV.deb
-
-
-RUN python --version
-RUN find / -name dist-packages
 
 RUN cp /usr/local/lib/python3.4/dist-packages/cv2.cpython-34m.so \
        /usr/lib/python3/dist-packages/cv2.cpython-34m.so
 
-RUN apt-get install -y libjpeg62 libtiff5 libpng12-0 libjasper1 \
-                       libgtk2.0-0 \
-                       libavcodec56 libavformat56 libswscale3 libv4l-0
-
-RUN pip install --no-cache-dir numpy
+#RUN apt-get install -y
 
 ADD camera.py /app/
 RUN python /app/camera.py
