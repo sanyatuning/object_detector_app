@@ -12,6 +12,4 @@ ADD . /app
 
 WORKDIR /app
 
-RUN python -u main.py
-
 CMD python -u main.py
