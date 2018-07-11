@@ -26,6 +26,7 @@ FROM resin/%%RESIN_MACHINE_NAME%%-alpine-python:3-slim
 #	-D CMAKE_INSTALL_PREFIX=/usr/local \
 #	-D INSTALL_C_EXAMPLES=OFF \
 #	-D INSTALL_PYTHON_EXAMPLES=ON \
+#   -D PYTHON_EXECUTABLE=/usr/bin/python3 \
 #	-D OPENCV_EXTRA_MODULES_PATH=/opencv_contrib-3.1.0/modules \
 #	-D BUILD_EXAMPLES=ON ..
 #
@@ -33,10 +34,6 @@ FROM resin/%%RESIN_MACHINE_NAME%%-alpine-python:3-slim
 #RUN make install
 
 #RUN pip install -q redis
-
-ENV OPENCV https://github.com/opencv/opencv/archive/3.3.0.tar.gz
-ENV OPENCV_EXTRA https://github.com/opencv/opencv_contrib/archive/3.3.0.tar.gz
-ENV OPENCV_VER 3.3.0
 
 RUN apk add -U --no-cache --virtual=build-dependencies \
     linux-headers musl libxml2-dev libxslt-dev libffi-dev g++ \
@@ -46,28 +43,35 @@ RUN apk add -U --no-cache --virtual=build-dependencies \
 RUN apk add --no-cache gcc tesseract-ocr zlib jpeg libjpeg freetype openjpeg curl \
     && ln -s /usr/include/locale.h /usr/include/xlocale.h \
     && pip install -U --no-cache-dir Pillow numpy
+RUN pip install -U --no-cache-dir redis
+
+ENV OPENCV https://github.com/opencv/opencv/archive/3.1.0.tar.gz
+ENV OPENCV_EXTRA https://github.com/opencv/opencv_contrib/archive/3.1.0.tar.gz
+ENV OPENCV_VER 3.1.0
 
 RUN mkdir -p /opt && cd /opt && \
     curl -L $OPENCV | tar zx && \
     curl -L $OPENCV_EXTRA | tar zx && \
     cd opencv-$OPENCV_VER && \
-    mkdir build && cd build && \
-    cmake -G Ninja \
+    mkdir build && cd build
+WORKDIR /opencv-$OPENCV_VER/build
+RUN cmake -G Ninja \
           -D CMAKE_BUILD_TYPE=RELEASE \
           -D CMAKE_INSTALL_PREFIX=/usr/local \
+          -D INSTALL_C_EXAMPLES=OFF \
+          -D INSTALL_PYTHON_EXAMPLES=ON \
           -D WITH_FFMPEG=NO \
           -D WITH_IPP=NO \
           -D PYTHON_EXECUTABLE=/usr/bin/python3 \
-          -D OPENCV_EXTRA_MODULES_PATH=//opt/opencv_contrib-$OPENCV_VER/modules \
-          -D WITH_OPENEXR=NO .. && \
-    ninja && ninja install && \
-    ln -s /usr/local/lib/python3.6/site-packages/cv2.cpython-36m-x86_64-linux-gnu.so \
-          /usr/lib/python3.6/site-packages/cv2.so && \
-    apk del build-dependencies && \
-    rm -rf /var/cache/apk/*
+          -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv_contrib-$OPENCV_VER/modules \
+          -D BUILD_EXAMPLES=ON \
+          -D WITH_OPENEXR=NO ..
+RUN ninja && ninja install
+RUN ln -s /usr/local/lib/python3.6/site-packages/cv2.cpython-36m-x86_64-linux-gnu.so \
+          /usr/lib/python3.6/site-packages/cv2.so
+#RUN apk del build-dependencies && \
+#    rm -rf /var/cache/apk/*
 
-RUN pip install -U --no-cache-dir redis
-RUN pip install -U --no-cache-dir opencv-python
 
 ADD object_detection /app/object_detection
 ADD utils /app/utils
