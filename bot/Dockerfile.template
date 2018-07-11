@@ -1,6 +1,10 @@
 FROM resin/%%RESIN_MACHINE_NAME%%-alpine-python:3-slim
 
 RUN pip install -U --no-cache-dir redis
+
+RUN apk add --no-cache --virtual=build-dependencies \
+    g++
+
 RUN pip install --no-cache-dir RPi.GPIO
 
 ADD . /app
