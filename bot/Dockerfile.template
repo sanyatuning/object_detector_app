@@ -11,6 +11,6 @@ ADD . /app
 
 WORKDIR /app
 
-RUN timeout 10 python -u main.py
+RUN python -u main.py
 
 CMD python -u main.py
