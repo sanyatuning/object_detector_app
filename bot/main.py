@@ -3,9 +3,9 @@
 import time
 
 from bottle import get, post, run, route, request, template, static_file
-from bot.bot import AlphaBot
-from bot.bot import Infrared
-from bot.bot import PCA9685
+from AlphaBot import AlphaBot
+from Infrared import Infrared
+from PCA9685 import PCA9685
 import threading
 
 Ab = AlphaBot()

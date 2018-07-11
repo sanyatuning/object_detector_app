@@ -27,6 +27,7 @@ services:
 
   redis:
     build: redis
+    command: redis-server --protected-mode no
     ports:
       - "6379"
 
