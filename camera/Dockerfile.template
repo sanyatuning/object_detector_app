@@ -1,0 +1,22 @@
+FROM resin/%%RESIN_MACHINE_NAME%%-alpine-python:3-slim
+
+#RUN [ "cross-build-start" ]
+
+RUN echo @edge http://nl.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories && \
+    echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories
+RUN cat /etc/apk/repositories
+
+RUN apk add --no-cache curl g++ dpkg@edge
+
+RUN pip install --no-cache-dir numpy
+
+RUN wget "https://github.com/jabelone/OpenCV-for-Pi/raw/master/latest-OpenCV.deb"
+RUN dpkg -i latest-OpenCV.deb
+
+ADD camera.py /app
+
+RUN python /app/camera.py
+
+#RUN [ "cross-build-end" ]
+
+CMD false
