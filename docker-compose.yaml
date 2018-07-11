@@ -9,6 +9,7 @@ version: '2'
 services:
   bot:
     build: bot
+    privileged: true
 
 #  camera:
 #    build:
