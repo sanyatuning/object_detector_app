@@ -10,6 +10,8 @@ services:
   bot:
     build: bot
     privileged: true
+    ports:
+      - "8001:8001"
 
 #  camera:
 #    build:
