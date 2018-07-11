@@ -10,17 +10,17 @@ services:
   bot:
     build: bot
 
-  camera:
-    build:
-      context: .
-      args:
-        WHL_URL: http://ci.tensorflow.org/view/Nightly/job/nightly-pi/lastSuccessfulBuild/artifact/output-artifacts/
-        WHL_FILE: tensorflow-1.9.0rc0-cp27-none-linux_armv7l.whl
-    devices:
-       - /dev/video0
-       - /dev/dri
-    ports:
-      - "8080:8080"
+#  camera:
+#    build:
+#      context: .
+#      args:
+#        WHL_URL: http://ci.tensorflow.org/view/Nightly/job/nightly-pi/lastSuccessfulBuild/artifact/output-artifacts/
+#        WHL_FILE: tensorflow-1.9.0rc0-cp27-none-linux_armv7l.whl
+#    devices:
+#       - /dev/video0
+#       - /dev/dri
+#    ports:
+#      - "8080:8080"
 
   redis:
     build: redis
