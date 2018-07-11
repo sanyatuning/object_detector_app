@@ -1,7 +1,7 @@
 FROM resin/%%RESIN_MACHINE_NAME%%-alpine-python:3-slim
 
 RUN apk add --no-cache --virtual=build-dependencies g++ && \
-    pip install --no-cache-dir bottle redis RPi.GPIO &&
+    pip install --no-cache-dir bottle redis RPi.GPIO && \
     apk del build-dependencies && \
     rm -rf /var/cache/apk/*
 
