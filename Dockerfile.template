@@ -54,7 +54,7 @@ RUN mkdir -p /opt && cd /opt && \
     curl -L $OPENCV_EXTRA | tar zx && \
     cd opencv-$OPENCV_VER && \
     mkdir build && cd build
-WORKDIR /opencv-$OPENCV_VER/build
+WORKDIR /opt/opencv-$OPENCV_VER/build
 RUN cmake -G Ninja \
           -D CMAKE_BUILD_TYPE=RELEASE \
           -D CMAKE_INSTALL_PREFIX=/usr/local \
