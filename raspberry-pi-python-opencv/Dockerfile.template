@@ -1,0 +1,10 @@
+FROM resin/%%RESIN_MACHINE_NAME%%-python:3.4-slim
+
+#RUN [ "cross-build-start" ]
+
+ADD install.sh /
+RUN [ "sh", "/install.sh" ]
+
+#RUN [ "cross-build-end" ]
+
+CMD ["echo", "'No CMD command was set in Dockerfile!" ]

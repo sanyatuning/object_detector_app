@@ -1,4 +1,3 @@
-import http
 import multiprocessing
 import os
 from threading import Thread
@@ -36,7 +35,7 @@ class CamHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path.endswith('.mjpg'):
-            self.send_response(http.HTTPStatus.OK)
+            self.send_response(200)
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
             while True:
@@ -56,12 +55,12 @@ class CamHandler(BaseHTTPRequestHandler):
                 except (IOError, ConnectionError):
                     break
         elif self.path.endswith('.html'):
-            self.send_response(http.HTTPStatus.OK)
+            self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write(self.html_page.encode())
         else:
-            self.send_response(http.HTTPStatus.NOT_FOUND)
+            self.send_response(404)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write(self.html_404_page.encode())

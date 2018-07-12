@@ -13,11 +13,14 @@ services:
     ports:
       - "80:8001"
 
-  camera:
-    build: camera
-    privileged: true
-    ports:
-      - "8080:8080"
+  base:
+    build: raspberry-pi-python-opencv
+
+#  camera:
+#    build: camera
+#    privileged: true
+#    ports:
+#      - "8080:8080"
 
 #  camera:
 #    build:
