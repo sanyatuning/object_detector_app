@@ -21,8 +21,7 @@ RUN cp /usr/local/lib/python3.4/dist-packages/cv2.cpython-34m.so \
 #RUN apt-get install -y
 
 ADD camera.py /app/
-RUN python /app/camera.py
 
 #RUN [ "cross-build-end" ]
 
-CMD false
+CMD python /app/camera.py
